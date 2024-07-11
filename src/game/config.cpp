@@ -1,6 +1,7 @@
 #include "zelda_config.h"
 #include "recomp_input.h"
 #include "zelda_sound.h"
+#include "zelda_textures.h"
 #include "zelda_render.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
@@ -19,6 +20,7 @@ constexpr std::u8string_view general_filename = u8"general.json";
 constexpr std::u8string_view graphics_filename = u8"graphics.json";
 constexpr std::u8string_view controls_filename = u8"controls.json";
 constexpr std::u8string_view sound_filename = u8"sound.json";
+constexpr std::u8string_view textures_filename = u8"textures.json";
 constexpr std::u8string_view program_id = u8"Zelda64Recompiled";
 
 constexpr auto res_default            = ultramodern::renderer::Resolution::Auto;
@@ -456,6 +458,25 @@ bool load_sound_config(const std::filesystem::path& path) {
     return true;
 }
 
+bool save_textures_config(const std::filesystem::path& path) {
+    nlohmann::json config_json{};
+
+    config_json["texture_path"] = zelda64::get_texture_path();
+    
+    return save_json_with_backups(path, config_json);
+}
+
+bool load_textures_config(const std::filesystem::path& path) {
+    nlohmann::json config_json{};
+    if (!read_json_with_backups(path, config_json)) {
+        return false;
+    }
+
+    zelda64::reset_textures_settings();
+    call_if_key_exists(zelda64::set_texture_path, config_json, "texture_path");
+    return true;
+}
+
 void zelda64::load_config() {
     detect_steam_deck();
 
@@ -464,6 +485,7 @@ void zelda64::load_config() {
     std::filesystem::path graphics_path = recomp_dir / graphics_filename;
     std::filesystem::path controls_path = recomp_dir / controls_filename;
     std::filesystem::path sound_path = recomp_dir / sound_filename;
+    std::filesystem::path textures_path = recomp_dir / textures_filename;
 
     if (!recomp_dir.empty()) {
         std::filesystem::create_directories(recomp_dir);
@@ -491,6 +513,11 @@ void zelda64::load_config() {
         zelda64::reset_sound_settings();
         save_sound_config(sound_path);
     }
+
+    if (!load_textures_config(textures_path)) {
+        zelda64::reset_textures_settings();
+        save_textures_config(textures_path);
+    }
 }
 
 void zelda64::save_config() {
@@ -508,4 +535,5 @@ void zelda64::save_config() {
     save_graphics_config(recomp_dir / graphics_filename);
     save_controls_config(recomp_dir / controls_filename);
     save_sound_config(recomp_dir / sound_filename);
+    save_textures_config(recomp_dir / textures_filename);
 }

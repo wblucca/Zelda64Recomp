@@ -2,6 +2,7 @@
 #include "recomp_input.h"
 #include "zelda_sound.h"
 #include "zelda_config.h"
+#include "zelda_textures.h"
 #include "zelda_debug.h"
 #include "zelda_render.h"
 #include "promptfont.h"
@@ -467,6 +468,30 @@ bool zelda64::get_low_health_beeps_enabled() {
     return (bool)sound_options_context.low_health_beeps_enabled.load();
 }
 
+struct TexturesContext {
+	std::string texture_path;
+	void reset() {
+		texture_path = "";
+	}
+	TexturesContext() {
+		reset();
+	}
+};
+
+TexturesContext textures_context;
+
+void zelda64::reset_textures_settings() {
+	sound_options_context.reset();
+}
+
+void zelda64::set_texture_path(std::string path) {
+	textures_context.texture_path = path;
+}
+
+std::string zelda64::get_texture_path() {
+	return textures_context.texture_path;
+}
+
 struct DebugContext {
 	Rml::DataModelHandle model_handle;
 	std::vector<std::string> area_names;
@@ -567,7 +592,7 @@ public:
 				controls_model_handle.DirtyVariable("input_device_is_keyboard");
 				controls_model_handle.DirtyVariable("inputs");
 			});
-			
+
 		recompui::register_event(listener, "area_index_changed",
 			[](const std::string& param, Rml::Event& event) {
 				debug_context.area_index = event.GetParameter<int>("value", 0);

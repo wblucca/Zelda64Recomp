@@ -10,6 +10,7 @@
 
 #include "zelda_render.h"
 #include "recomp_ui.h"
+#include <zelda_textures.h>
 
 static RT64::UserConfiguration::Antialiasing device_max_msaa = RT64::UserConfiguration::Antialiasing::None;
 static bool sample_positions_supported = false;
@@ -281,6 +282,10 @@ zelda64::renderer::RT64Context::RT64Context(uint8_t* rdram, ultramodern::rendere
     }
 
     high_precision_fb_enabled = app->shaderLibrary->usesHDR;
+
+    // Get the texture replacement directory path from config
+    std::string path = zelda64::get_texture_path();
+    app->textureCache->loadReplacementDirectory(path);
 }
 
 zelda64::renderer::RT64Context::~RT64Context() = default;
