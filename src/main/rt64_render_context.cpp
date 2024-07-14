@@ -285,7 +285,9 @@ zelda64::renderer::RT64Context::RT64Context(uint8_t* rdram, ultramodern::rendere
 
     // Get the texture replacement directory path from config
     std::string path = zelda64::get_texture_path();
-    app->textureCache->loadReplacementDirectory(path);
+    if (!path.empty()) {
+        app->textureCache->loadReplacementDirectory(path);
+    }
 }
 
 zelda64::renderer::RT64Context::~RT64Context() = default;
